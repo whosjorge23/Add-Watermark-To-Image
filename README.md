@@ -18,7 +18,7 @@ This repository contains a Python script that can be used to add logos to images
 
 1. Clone this repository:
     ```
-    [git clone https://github.com/your-username/image-logo-adder.git](https://github.com/whosjorge23/Add-Watermark-To-Image.git)
+    git clone https://github.com/your-username/image-logo-adder.git
     ```
     
 2. Change to the cloned directory:
