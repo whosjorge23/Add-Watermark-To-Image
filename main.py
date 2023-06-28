@@ -1,4 +1,4 @@
-from PIL import Image
+from PIL import Image, ExifTags
 import os
 
 def add_logo_to_images(images_folder, logo_path_right, logo_path_left, output_dir):
@@ -12,11 +12,11 @@ def add_logo_to_images(images_folder, logo_path_right, logo_path_left, output_di
     if logo_left.mode in ('P', 'RGB'):
         logo_left = logo_left.convert('RGBA')
     
-    # Ridurre le dimensioni dei loghi del 50%
-    logo_size_right = (int(logo_right.width * 0.2), int(logo_right.height * 0.2))
+    # Ridurre le dimensioni dei loghi
+    logo_size_right = (int(logo_right.width * 0.5), int(logo_right.height * 0.5))
     logo_right = logo_right.resize(logo_size_right, Image.ANTIALIAS)
 
-    logo_size_left = (int(logo_left.width * 0.2), int(logo_left.height * 0.2))
+    logo_size_left = (int(logo_left.width * 1.5), int(logo_left.height * 1.5))
     logo_left = logo_left.resize(logo_size_left, Image.ANTIALIAS)
 
     # Ottenere la lista di tutti i file nella cartella delle immagini
@@ -29,6 +29,22 @@ def add_logo_to_images(images_folder, logo_path_right, logo_path_left, output_di
     for image_path in image_paths:
         # Aprire l'immagine
         image = Image.open(image_path)
+
+        # Check for EXIF data and correct orientation
+        try:
+            for orientation in ExifTags.TAGS.keys():
+                if ExifTags.TAGS[orientation] == 'Orientation':
+                    break
+            exif = dict(image._getexif().items())
+            if exif[orientation] == 3:
+                image = image.rotate(180, expand=True)
+            elif exif[orientation] == 6:
+                image = image.rotate(270, expand=True)
+            elif exif[orientation] == 8:
+                image = image.rotate(90, expand=True)
+        except (AttributeError, KeyError, IndexError):
+            # Cases: image don't have getexif
+            pass
 
         # Utilizzare il canale alfa del logo destro come maschera
         logo_mask_right = logo_right.split()[-1] if logo_right.mode == 'RGBA' else None
@@ -53,8 +69,8 @@ def add_logo_to_images(images_folder, logo_path_right, logo_path_left, output_di
 images_folder = 'jpg'
 
 # Percorsi dei file loghi
-logo_path_right = 'logo/logo_right.png'
-logo_path_left = 'logo/logo_left.png'
+logo_path_right = 'logo/logo1.png'
+logo_path_left = 'logo/logo2.png'
 
 # Cartella in cui salvare le immagini modificate
 output_dir = 'output/'
